@@ -26,10 +26,6 @@ runs:
         curl -o start.sh https://raw.githubusercontent.com/gustavogarayalde/github-actions/v0.0.13/dockerfiles/${{ inputs.app-type }}/start.sh
         chmod +x start.sh
 
-    - name: Get latest tag
-      shell: bash
-      run: echo "PUSHED_TAG=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
-
     - name: Build and push
       uses: docker/build-push-action@v3
       with:

@@ -106,10 +106,6 @@ runs:
       shell: bash
       run: npm run build-storybook
 
-    - name: Get latest tag
-      shell: bash
-      run: echo "PUSHED_TAG=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
-
     - name: Create Sentry release
       uses: getsentry/action-release@v1
       if: ${{ inputs.sentry-token != '' }}
