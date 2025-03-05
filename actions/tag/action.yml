@@ -1,0 +1,44 @@
+name: "Tag Version"
+inputs:
+  token:
+    description: "A Github token"
+    required: true
+  build-tool:
+    description: "maven | npm"
+    required: true
+  app-type:
+    description: "spring-boot | npm-ui-lib"
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+    - name: Git Config
+      shell: bash
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+
+    - uses: gustavogarayalde/github-actions/actions/tag/pr@v0.0.15-rc
+      name: Tag PR
+      if: ${{ github.event_name == 'pull_request' }}
+      with:
+        app-type: ${{ inputs.app-type }}
+        build-tool: ${{ inputs.build-tool }}
+
+    - uses: gustavogarayalde/github-actions/actions/release@v0.0.15-rc
+      name: Release
+      if: ${{ github.event_name != 'pull_request' }}
+      with:
+        app-type: ${{ inputs.app-type }}
+        build-tool: ${{ inputs.build-tool }}
+
+    - uses: actions/checkout@v3
+      name: Checkout prepare push tag
+      with:
+        token: ${{ inputs.token }}
+        clean: "false"
+
+    - name: Push tag
+      shell: bash
+      run: git push --tags

@@ -1,54 +1,18 @@
-name: "Tag PR"
+name: "Tag"
 inputs:
-  token:
-    description: "A Github token"
-    required: true
-  build-tool:
-    description: "maven | npm"
-    required: true
   app-type:
     description: "spring-boot | npm-ui-lib"
     required: false
-  settings-url:
-    description: "URL to settings.xml file"
-    required: false
-  with-storybook:
-    description: "true | false"
-    required: false
-  skip-tests:
-    description: "true | false"
-    required: false
+  build-tool:
+    description: "maven | npm"
+    required: true
 
 runs:
   using: "composite"
   steps:
-    - uses: actions/checkout@v3
-      with:
-        ref: ${{ github.event.pull_request.head.ref }}
-
-    - uses: gustavogarayalde/github-actions/actions/build/maven@v0.0.14
-      name: Maven Build
-      if: ${{ inputs.build-tool == 'maven' }}
-      with:
-        settings-url: ${{ inputs.settings-url }}
-        token: ${{ inputs.token }}
-        publish-coverage-report: "true"
-
-    - uses: gustavogarayalde/github-actions/actions/build/npm@v0.0.14
-      name: NPM Build
-      if: ${{ inputs.build-tool == 'npm' }}
-      with:
-        app-type: ${{ inputs.app-type }}
-        token: ${{ inputs.token }}
-        with-storybook: ${{ inputs.with-storybook }}
-        publish-coverage-report: "true"
-        skip-tests: ${{ inputs.skip-tests }}
-
     - name: Git Config
       shell: bash
       run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
         echo "PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')" >> $GITHUB_ENV
 
     - uses: actions/checkout@v3
@@ -67,13 +31,3 @@ runs:
       run: |
         npm version prerelease --preid=pr-${{ env.PR_NUMBER }}
         git push
-
-    - uses: actions/checkout@v3
-      name: Checkout prepare push tag
-      with:
-        token: ${{ inputs.token }}
-        clean: "false"
-
-    - name: Push tag
-      shell: bash
-      run: git push --tags
