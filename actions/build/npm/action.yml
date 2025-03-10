@@ -114,7 +114,7 @@ runs:
         SENTRY_ORG: ${{ inputs.sentry-org }}
         SENTRY_PROJECT: ${{ inputs.sentry-project }}
       with:
-        version: ${{ env.PUSHED_TAG }}
+        version: ${{ env.LATEST_TAG }}
         sourcemaps: .next
         ignore_missing: "true"
         ignore_empty: "true"
