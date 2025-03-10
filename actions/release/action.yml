@@ -1,0 +1,22 @@
+name: "Tag"
+inputs:
+  build-tool:
+    description: "maven | npm"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - uses: gustavogarayalde/github-actions/actions/release/maven@v0.0.15
+      name: Maven Release
+      if: ${{ inputs.build-tool == 'maven'}}
+      with:
+        token: ${{ github.token }}
+
+    - uses: gustavogarayalde/github-actions/actions/release/npm@v0.0.15
+      name: NPM Release
+      if: ${{ inputs.build-tool == 'npm'}}
+
+    - name: Push version bump to repo
+      shell: bash
+      run: git push

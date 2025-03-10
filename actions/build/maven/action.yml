@@ -6,9 +6,6 @@ inputs:
   token:
     description: "Github Token"
     required: false
-  publish-coverage-report:
-    description: "true | false"
-    required: false
 
 runs:
   using: "composite"
@@ -59,7 +56,7 @@ runs:
 
     - name: Commit and push the coverage badges and summary file
       shell: bash
-      if: ${{ inputs.publish-coverage-report == 'true' }}
+      if: ${{ github.event_name != 'pull_request' }}
       run: |
         if [[ `git status --porcelain *.svg *.json` ]]; then
           git config --local user.email "action@github.com"
@@ -71,7 +68,7 @@ runs:
 
     - name: Comment on PR with coverage percentages
       shell: bash
-      if: ${{ github.event_name == 'pull_request' && inputs.publish-coverage-report == 'true' }}
+      if: ${{ github.event_name == 'pull_request' }}
       run: |
         REPORT=$(<.github/badges/coverage-summary.json)
         COVERAGE=$(jq -r '.coverage' <<< "$REPORT")%

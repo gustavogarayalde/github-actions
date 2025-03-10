@@ -1,0 +1,14 @@
+name: "Checkout Repository"
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v3
+      if: ${{ github.event_name != 'pull_request' }}
+      with:
+        fetch-depth: 0
+    
+    - uses: actions/checkout@v3
+      if: ${{ github.event_name == 'pull_request' }}
+      with:
+        ref: ${{ github.event.pull_request.head.ref }}

@@ -1,0 +1,49 @@
+name: "Build Project"
+inputs:
+  build-tool:
+    description: "maven | npm"
+    required: true
+  token:
+    description: "A Github Token"
+    required: true
+  app-type:
+    description: "spring-boot | npm-ui-lib"
+    required: false
+  settings-url:
+    description: "URL to settings.xml file"
+    required: false
+  sentry-token:
+    description: "Sentry Auth Token"
+    required: false
+  sentry-org:
+    description: "Sentry Organization Name"
+    required: false
+  sentry-project:
+    description: "Sentry Project Name"
+    required: false
+  with-storybook:
+    description: "true | false"
+    required: false
+  skip-tests:
+    description: "true | false"
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+    - uses: gustavogarayalde/github-actions/actions/build/maven@v0.0.15
+      if: ${{ inputs.build-tool == 'maven'}}
+      with:
+        settings-url: ${{ inputs.settings-url }}
+        token: ${{ inputs.token }}
+
+    - uses: gustavogarayalde/github-actions/actions/build/npm@v0.0.15
+      if: ${{ inputs.build-tool == 'npm'}}
+      with:
+        app-type: ${{ inputs.app-type }}
+        token: ${{ inputs.token }}
+        sentry-token: ${{ inputs.sentry-token }}
+        sentry-org: ${{ inputs.sentry-org }}
+        sentry-project: ${{ inputs.sentry-project }}
+        with-storybook: ${{ inputs.with-storybook }}
+        skip-tests: ${{ inputs.skip-tests }}

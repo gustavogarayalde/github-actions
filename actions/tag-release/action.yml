@@ -1,0 +1,68 @@
+name: "Publish"
+inputs:
+  repository:
+    description: "docker | maven | npm"
+    required: true
+  build-tool:
+    description: "maven | npm"
+    required: true
+  token:
+    description: "A Github Token"
+    required: true
+  app-type:
+    description: "spring-boot | npm-ui-lib"
+    required: true
+  settings-url:
+    description: "URL to settings.xml file"
+    required: false
+  sentry-token:
+    description: "Sentry Auth Token"
+    required: false
+  sentry-org:
+    description: "Sentry Organization Name"
+    required: false
+  sentry-project:
+    description: "Sentry Project Name"
+    required: false
+  with-storybook:
+    description: "true | false"
+    required: false
+  skip-tests:
+    description: "true | false"
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+    - uses: gustavogarayalde/github-actions/actions/checkout@v0.0.15
+
+    - uses: gustavogarayalde/github-actions/actions/build@v0.0.15
+      with:
+        settings-url: ${{ inputs.settings-url }}
+        token: ${{ inputs.token }}
+        app-type: ${{ inputs.app-type }}
+        build-tool: ${{ inputs.build-tool }}
+        sentry-token: ${{ inputs.sentry-token }}
+        sentry-org: ${{ inputs.sentry-org }}
+        sentry-project: ${{ inputs.sentry-project }}
+        with-storybook: ${{ inputs.with-storybook }}
+        skip-tests: ${{ inputs.skip-tests }}
+
+    - uses: gustavogarayalde/github-actions/actions/tag@v0.0.15
+      with:
+        settings-url: ${{ inputs.settings-url }}
+        token: ${{ inputs.token }}
+        app-type: ${{ inputs.app-type }}
+        build-tool: ${{ inputs.build-tool }}
+        sentry-token: ${{ inputs.sentry-token }}
+        sentry-org: ${{ inputs.sentry-org }}
+        sentry-project: ${{ inputs.sentry-project }}
+        with-storybook: ${{ inputs.with-storybook }}
+        skip-tests: ${{ inputs.skip-tests }}
+
+    - uses: gustavogarayalde/github-actions/actions/publish@v0.0.15
+      with:
+        token: ${{ inputs.token }}
+        app-type: ${{ inputs.app-type }}
+        repository: ${{ inputs.repository }}
+        with-storybook: ${{ inputs.with-storybook }}
