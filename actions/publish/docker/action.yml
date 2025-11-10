@@ -23,7 +23,7 @@ runs:
       if: ${{ inputs.app-type == 'next-js' }}
       shell: bash
       run: |
-        curl -o start.sh https://raw.githubusercontent.com/gustavogarayalde/github-actions/v0.0.13/dockerfiles/${{ inputs.app-type }}/start.sh
+        curl -o start.sh https://raw.githubusercontent.com/gustavogarayalde/github-actions/v0.0.17/dockerfiles/${{ inputs.app-type }}/start.sh
         chmod +x start.sh
 
     - name: Build and push
@@ -31,6 +31,6 @@ runs:
       with:
         context: .
         push: true
-        file: https://raw.githubusercontent.com/gustavogarayalde/github-actions/v0.0.13/dockerfiles/${{ inputs.app-type }}/Dockerfile
+        file: https://raw.githubusercontent.com/gustavogarayalde/github-actions/v0.0.17/dockerfiles/${{ inputs.app-type }}/Dockerfile
         tags: docker.pkg.github.com/${{ github.repository }}/${{ github.event.repository.name }}:${{ env.LATEST_TAG }}
         github-token: ${{ inputs.token }}

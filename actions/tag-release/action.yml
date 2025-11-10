@@ -34,9 +34,9 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: gustavogarayalde/github-actions/actions/checkout@v0.0.16
+    - uses: gustavogarayalde/github-actions/actions/checkout@v0.0.17
 
-    - uses: gustavogarayalde/github-actions/actions/build@v0.0.16
+    - uses: gustavogarayalde/github-actions/actions/build@v0.0.17
       with:
         settings-url: ${{ inputs.settings-url }}
         token: ${{ inputs.token }}
@@ -48,7 +48,7 @@ runs:
         with-storybook: ${{ inputs.with-storybook }}
         skip-tests: ${{ inputs.skip-tests }}
 
-    - uses: gustavogarayalde/github-actions/actions/tag@v0.0.16
+    - uses: gustavogarayalde/github-actions/actions/tag@v0.0.17
       with:
         settings-url: ${{ inputs.settings-url }}
         token: ${{ inputs.token }}
@@ -60,7 +60,7 @@ runs:
         with-storybook: ${{ inputs.with-storybook }}
         skip-tests: ${{ inputs.skip-tests }}
 
-    - uses: gustavogarayalde/github-actions/actions/publish@v0.0.16
+    - uses: gustavogarayalde/github-actions/actions/publish@v0.0.17
       with:
         token: ${{ inputs.token }}
         app-type: ${{ inputs.app-type }}
