@@ -1,10 +1,13 @@
 name: "Tag"
 inputs:
   app-type:
-    description: "spring-boot | npm-ui-lib"
+    description: "spring-boot | npm-ui-lib | android-app"
     required: false
   build-tool:
-    description: "maven | npm"
+    description: "maven | npm | gradle"
+    required: true
+  token:
+    description: "Github Token"
     required: true
 
 runs:
@@ -33,3 +36,10 @@ runs:
       run: |
         npm version prerelease --preid=pr-${{ env.PR_NUMBER }}
         git push
+
+    - uses: gustavogarayalde/github-actions/actions/tag/pr/gradle@v0.0.18
+      if: ${{ inputs.build-tool == 'gradle' }}
+      with:
+        app-type: ${{ inputs.app-type }}
+        build-tool: ${{ inputs.build-tool }}
+        token: ${{ inputs.token }}

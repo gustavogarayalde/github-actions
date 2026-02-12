@@ -1,13 +1,13 @@
 name: "Build Project"
 inputs:
   build-tool:
-    description: "maven | npm"
+    description: "maven | npm | gradle"
     required: true
   token:
     description: "A Github Token"
     required: true
   app-type:
-    description: "spring-boot | npm-ui-lib"
+    description: "spring-boot | npm-ui-lib | android-app"
     required: false
   settings-url:
     description: "URL to settings.xml file"
@@ -31,13 +31,13 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: gustavogarayalde/github-actions/actions/build/maven@v0.0.17
+    - uses: gustavogarayalde/github-actions/actions/build/maven@v0.0.18
       if: ${{ inputs.build-tool == 'maven'}}
       with:
         settings-url: ${{ inputs.settings-url }}
         token: ${{ inputs.token }}
 
-    - uses: gustavogarayalde/github-actions/actions/build/npm@v0.0.17
+    - uses: gustavogarayalde/github-actions/actions/build/npm@v0.0.18
       if: ${{ inputs.build-tool == 'npm'}}
       with:
         app-type: ${{ inputs.app-type }}
@@ -46,4 +46,10 @@ runs:
         sentry-org: ${{ inputs.sentry-org }}
         sentry-project: ${{ inputs.sentry-project }}
         with-storybook: ${{ inputs.with-storybook }}
+        skip-tests: ${{ inputs.skip-tests }}
+
+    - uses: gustavogarayalde/github-actions/actions/build/gradle@v0.0.18
+      if: ${{ inputs.build-tool == 'gradle'}}
+      with:
+        token: ${{ inputs.token }}
         skip-tests: ${{ inputs.skip-tests }}

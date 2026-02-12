@@ -1,21 +1,30 @@
 name: "Tag"
 inputs:
   build-tool:
-    description: "maven | npm"
+    description: "maven | npm | gradle"
+    required: true
+  token:
+    description: "Github Token"
     required: true
 
 runs:
   using: "composite"
   steps:
-    - uses: gustavogarayalde/github-actions/actions/release/maven@v0.0.17
+    - uses: gustavogarayalde/github-actions/actions/release/maven@v0.0.18
       name: Maven Release
       if: ${{ inputs.build-tool == 'maven'}}
       with:
         token: ${{ github.token }}
 
-    - uses: gustavogarayalde/github-actions/actions/release/npm@v0.0.17
+    - uses: gustavogarayalde/github-actions/actions/release/npm@v0.0.18
       name: NPM Release
       if: ${{ inputs.build-tool == 'npm'}}
+
+    - uses: gustavogarayalde/github-actions/actions/release/gradle@v0.0.18
+      name: Gradle Release
+      if: ${{ inputs.build-tool == 'gradle'}}
+      with:
+        token: ${{ inputs.token }}
 
     - name: Push version bump to repo
       shell: bash

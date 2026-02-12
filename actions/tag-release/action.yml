@@ -1,16 +1,16 @@
 name: "Publish"
 inputs:
   repository:
-    description: "docker | maven | npm"
+    description: "docker | maven | npm | google-play"
     required: true
   build-tool:
-    description: "maven | npm"
+    description: "maven | npm | gradle"
     required: true
   token:
     description: "A Github Token"
     required: true
   app-type:
-    description: "spring-boot | npm-ui-lib"
+    description: "spring-boot | npm-ui-lib | android-app"
     required: true
   settings-url:
     description: "URL to settings.xml file"
@@ -30,13 +30,23 @@ inputs:
   skip-tests:
     description: "true | false"
     required: false
+  service-account-json:
+    description: "Google Play Service Account JSON (base64 encoded)"
+    required: false
+  package-name:
+    description: "Android package name"
+    required: false
+  track:
+    description: "Release track: internal | alpha | beta | production"
+    required: false
+    default: "internal"
 
 runs:
   using: "composite"
   steps:
-    - uses: gustavogarayalde/github-actions/actions/checkout@v0.0.17
+    - uses: gustavogarayalde/github-actions/actions/checkout@v0.0.18
 
-    - uses: gustavogarayalde/github-actions/actions/build@v0.0.17
+    - uses: gustavogarayalde/github-actions/actions/build@v0.0.18
       with:
         settings-url: ${{ inputs.settings-url }}
         token: ${{ inputs.token }}
@@ -48,7 +58,7 @@ runs:
         with-storybook: ${{ inputs.with-storybook }}
         skip-tests: ${{ inputs.skip-tests }}
 
-    - uses: gustavogarayalde/github-actions/actions/tag@v0.0.17
+    - uses: gustavogarayalde/github-actions/actions/tag@v0.0.18
       with:
         settings-url: ${{ inputs.settings-url }}
         token: ${{ inputs.token }}
@@ -60,9 +70,12 @@ runs:
         with-storybook: ${{ inputs.with-storybook }}
         skip-tests: ${{ inputs.skip-tests }}
 
-    - uses: gustavogarayalde/github-actions/actions/publish@v0.0.17
+    - uses: gustavogarayalde/github-actions/actions/publish@v0.0.18
       with:
         token: ${{ inputs.token }}
         app-type: ${{ inputs.app-type }}
         repository: ${{ inputs.repository }}
         with-storybook: ${{ inputs.with-storybook }}
+        service-account-json: ${{ inputs.service-account-json }}
+        package-name: ${{ inputs.package-name }}
+        track: ${{ inputs.track }}

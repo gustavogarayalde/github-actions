@@ -4,30 +4,48 @@ inputs:
     description: "A Github Token"
     required: true
   app-type:
-    description: "spring-boot | npm-ui-lib"
+    description: "spring-boot | npm-ui-lib | android-app"
     required: true
   repository:
-    description: "docker | maven | npm"
+    description: "docker | maven | npm | google-play"
     required: true
   with-storybook:
     description: "true | false"
     required: false
+  service-account-json:
+    description: "Google Play Service Account JSON (base64 encoded)"
+    required: false
+  package-name:
+    description: "Android package name"
+    required: false
+  track:
+    description: "Release track: internal | alpha | beta | production"
+    required: false
+    default: "internal"
 
 runs:
   using: "composite"
   steps:
-    - uses: gustavogarayalde/github-actions/actions/publish/maven@v0.0.17
+    - uses: gustavogarayalde/github-actions/actions/publish/maven@v0.0.18
       if: ${{ inputs.repository == 'maven'}}
       with:
         token: ${{ inputs.token }}
 
-    - uses: gustavogarayalde/github-actions/actions/publish/npm@v0.0.17
+    - uses: gustavogarayalde/github-actions/actions/publish/npm@v0.0.18
       if: ${{ inputs.repository == 'npm'}}
       with:
         token: ${{ inputs.token }}
 
-    - uses: gustavogarayalde/github-actions/actions/publish/docker@v0.0.17
+    - uses: gustavogarayalde/github-actions/actions/publish/docker@v0.0.18
       if: ${{ inputs.repository == 'docker' || inputs.with-storybook == 'true' }}
       with:
         token: ${{ inputs.token }}
         app-type: ${{ inputs.app-type }}
+
+    - uses: gustavogarayalde/github-actions/actions/publish/google-play@v0.0.18
+      if: ${{ inputs.repository == 'google-play' && github.ref == 'refs/heads/main' }}
+      with:
+        token: ${{ inputs.token }}
+        service-account-json: ${{ inputs.service-account-json }}
+        package-name: ${{ inputs.package-name }}
+        track: ${{ inputs.track }}

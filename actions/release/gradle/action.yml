@@ -1,0 +1,62 @@
+name: 'Release with Gradle'
+inputs:
+  token:
+    description: 'A Github token'
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Get current version
+      shell: bash
+      run: |
+        # Extract version from gradle.properties or build.gradle.kts
+        if [ -f "gradle.properties" ]; then
+          CURRENT_VERSION=$(grep "version=" gradle.properties | cut -d'=' -f2 | tr -d '[:space:]')
+        else
+          CURRENT_VERSION=$(grep "version =" build.gradle.kts | head -1 | sed 's/.*version = "\(.*\)".*/\1/')
+        fi
+        echo "CURRENT_VERSION=$CURRENT_VERSION" >> $GITHUB_ENV
+        
+        # Increment version (simple patch increment)
+        IFS='.' read -ra VERSION_PARTS <<< "$CURRENT_VERSION"
+        MAJOR="${VERSION_PARTS[0]}"
+        MINOR="${VERSION_PARTS[1]}"
+        PATCH="${VERSION_PARTS[2]}"
+        NEW_PATCH=$((PATCH + 1))
+        NEW_VERSION="$MAJOR.$MINOR.$NEW_PATCH"
+        echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+
+    - name: Update version in gradle.properties
+      shell: bash
+      run: |
+        if [ -f "gradle.properties" ]; then
+          sed -i "s/version=.*/version=$NEW_VERSION/" gradle.properties
+        else
+          # Update build.gradle.kts
+          sed -i "s/version = \".*\"/version = \"$NEW_VERSION\"/" build.gradle.kts
+        fi
+
+    - name: Update version in version files
+      shell: bash
+      run: |
+        # Update versionName in build.gradle.kts files
+        find . -name "build.gradle.kts" -type f -exec sed -i "s/versionName = \".*\"/versionName = \"$NEW_VERSION\"/" {} \;
+        
+        # Increment versionCode
+        for file in $(find . -name "build.gradle.kts" -type f); do
+          if grep -q "versionCode" "$file"; then
+            CURRENT_CODE=$(grep "versionCode =" "$file" | head -1 | sed 's/.*versionCode = \([0-9]*\).*/\1/')
+            NEW_CODE=$((CURRENT_CODE + 1))
+            sed -i "s/versionCode = $CURRENT_CODE/versionCode = $NEW_CODE/" "$file"
+          fi
+        done
+
+    - name: Commit version bump
+      shell: bash
+      run: |
+        git add .
+        git commit -m "[skip ci] Bump version to $NEW_VERSION" || true
+
+    - name: Create tag
+      shell: bash
+      run: git tag -a v$NEW_VERSION -m "Release version $NEW_VERSION"
