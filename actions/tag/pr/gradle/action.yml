@@ -47,8 +47,8 @@ runs:
     - name: Create GitHub Release for PR
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: pr-${{ env.PR_NUMBER }}-$GITHUB_RUN_NUMBER
-        name: PR #${{ env.PR_NUMBER }} - Build ${{ github.run_number }}
+        tag_name: pr-${{ env.PR_NUMBER }}-${{ github.run_number }}
+        name: "PR #${{ env.PR_NUMBER }} - Build ${{ github.run_number }}"
         body: |
           ## PR Build Artifacts
           
