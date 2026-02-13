@@ -3,10 +3,22 @@ FROM node:20-alpine AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Copy dependency files only (for better caching)
-COPY package.json package-lock.json* ./
+# Accept GitHub token as build argument
+ARG NPM_TOKEN
+
+# Copy dependency files and .npmrc
+COPY package.json package-lock.json* .npmrc* ./
+
+# Configure npm authentication for GitHub Packages
+RUN if [ -n "$NPM_TOKEN" ]; then \
+    echo "//npm.pkg.github.com/:_authToken=${NPM_TOKEN}" >> .npmrc; \
+    fi
+
 # Install dependencies using ci for reproducible builds
 RUN npm ci --legacy-peer-deps
+
+# Clean up authentication from this layer
+RUN rm -f .npmrc
 
 # Builder stage
 FROM node:20-alpine AS builder
