@@ -30,6 +30,11 @@ runs:
       shell: bash
       run: git tag -a pr-${{ env.PR_NUMBER }}-$GITHUB_RUN_NUMBER -m "pr-${{ env.PR_NUMBER }}-$GITHUB_RUN_NUMBER"
 
+    - name: Disable git hooks for npm version
+      if: ${{ inputs.app-type == 'npm-ui-lib' }}
+      shell: bash
+      run: git config core.hooksPath /dev/null
+
     - name: Tag NPM Lib Version
       if: ${{ inputs.app-type == 'npm-ui-lib' }}
       shell: bash
