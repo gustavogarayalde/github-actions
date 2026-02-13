@@ -2,6 +2,10 @@ name: 'Release with NPM'
 runs:
   using: "composite"
   steps:
+    - name: Disable git hooks
+      shell: bash
+      run: git config core.hooksPath /dev/null
+
     - name: NPM Release
       shell: bash
       run: npm version patch
