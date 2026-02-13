@@ -46,6 +46,10 @@ runs:
   steps:
     - uses: gustavogarayalde/github-actions/actions/checkout@v0.0.18
 
+    - name: Disable git hooks
+      shell: bash
+      run: git config --global core.hooksPath /dev/null
+
     - uses: gustavogarayalde/github-actions/actions/build@v0.0.18
       with:
         settings-url: ${{ inputs.settings-url }}

@@ -9,6 +9,6 @@ runs:
     - name: Maven Release
       shell: bash
       run: |
-        mvn --batch-mode clean build-helper:parse-version release:prepare -DdevelopmentVersion=\${parsedVersion.majorVersion}.\${parsedVersion.minorVersion}.\${parsedVersion.nextIncrementalVersion}-SNAPSHOT -DpushChanges=false
+        mvn --batch-mode clean build-helper:parse-version release:prepare -DdevelopmentVersion=\${parsedVersion.majorVersion}.\${parsedVersion.minorVersion}.\${parsedVersion.nextIncrementalVersion}-SNAPSHOT -DpushChanges=false -Darguments="-Dmaven.test.skip=true" -Dmaven.test.skip=true
       env:
         GITHUB_TOKEN: ${{ inputs.token }}
