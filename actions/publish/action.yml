@@ -26,23 +26,23 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: gustavogarayalde/github-actions/actions/publish/maven@v0.0.18
+    - uses: gustavogarayalde/github-actions/actions/publish/maven@v0.0.19
       if: ${{ inputs.repository == 'maven'}}
       with:
         token: ${{ inputs.token }}
 
-    - uses: gustavogarayalde/github-actions/actions/publish/npm@v0.0.18
+    - uses: gustavogarayalde/github-actions/actions/publish/npm@v0.0.19
       if: ${{ inputs.repository == 'npm'}}
       with:
         token: ${{ inputs.token }}
 
-    - uses: gustavogarayalde/github-actions/actions/publish/docker@v0.0.18
+    - uses: gustavogarayalde/github-actions/actions/publish/docker@v0.0.19
       if: ${{ inputs.repository == 'docker' || inputs.with-storybook == 'true' }}
       with:
         token: ${{ inputs.token }}
         app-type: ${{ inputs.app-type }}
 
-    - uses: gustavogarayalde/github-actions/actions/publish/google-play@v0.0.18
+    - uses: gustavogarayalde/github-actions/actions/publish/google-play@v0.0.19
       if: ${{ inputs.repository == 'google-play' && github.ref == 'refs/heads/main' }}
       with:
         token: ${{ inputs.token }}

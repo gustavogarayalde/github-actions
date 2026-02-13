@@ -31,13 +31,13 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: gustavogarayalde/github-actions/actions/build/maven@v0.0.18
+    - uses: gustavogarayalde/github-actions/actions/build/maven@v0.0.19
       if: ${{ inputs.build-tool == 'maven'}}
       with:
         settings-url: ${{ inputs.settings-url }}
         token: ${{ inputs.token }}
 
-    - uses: gustavogarayalde/github-actions/actions/build/npm@v0.0.18
+    - uses: gustavogarayalde/github-actions/actions/build/npm@v0.0.19
       if: ${{ inputs.build-tool == 'npm'}}
       with:
         app-type: ${{ inputs.app-type }}
@@ -48,7 +48,7 @@ runs:
         with-storybook: ${{ inputs.with-storybook }}
         skip-tests: ${{ inputs.skip-tests }}
 
-    - uses: gustavogarayalde/github-actions/actions/build/gradle@v0.0.18
+    - uses: gustavogarayalde/github-actions/actions/build/gradle@v0.0.19
       if: ${{ inputs.build-tool == 'gradle'}}
       with:
         token: ${{ inputs.token }}
