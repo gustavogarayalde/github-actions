@@ -1,0 +1,42 @@
+name: "Publish to Google Play"
+inputs:
+  token:
+    description: "Github Token"
+    required: true
+  service-account-json:
+    description: "Google Play Service Account JSON (base64 encoded)"
+    required: true
+  package-name:
+    description: "Android package name"
+    required: true
+  track:
+    description: "Release track: internal | alpha | beta | production"
+    required: false
+    default: "internal"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Download Bundle artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: android-bundle
+
+    - name: Decode Service Account JSON
+      shell: bash
+      run: |
+        echo "${{ inputs.service-account-json }}" | base64 -d > service-account.json
+
+    - name: Publish to Google Play
+      uses: r0adkll/upload-google-play@v1
+      with:
+        serviceAccountJson: service-account.json
+        packageName: ${{ inputs.package-name }}
+        releaseFiles: '**/*.aab'
+        track: ${{ inputs.track }}
+        status: completed
+
+    - name: Clean up credentials
+      if: always()
+      shell: bash
+      run: rm -f service-account.json
