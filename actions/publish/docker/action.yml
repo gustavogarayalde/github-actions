@@ -34,5 +34,3 @@ runs:
         file: https://raw.githubusercontent.com/gustavogarayalde/github-actions/v0.0.19/dockerfiles/${{ inputs.app-type }}/Dockerfile
         tags: ghcr.io/${{ github.repository }}/${{ github.event.repository.name }}:${{ env.LATEST_TAG }}
         github-token: ${{ inputs.token }}
-        build-args: |
-          NPM_TOKEN=${{ inputs.token }}
