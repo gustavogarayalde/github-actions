@@ -35,13 +35,13 @@ runs:
       with:
         fetch-depth: 0
 
-    - uses: gustavogarayalde/github-actions/actions/build/maven@v0.0.11
+    - uses: gustavogarayalde/github-actions/actions/build/maven@v0.0.11-b
       if: ${{ inputs.build-tool == 'maven'}}
       with:
         settings-url: ${{ inputs.settings-url }}
         token: ${{ inputs.token }}
 
-    - uses: gustavogarayalde/github-actions/actions/build/npm@v0.0.11
+    - uses: gustavogarayalde/github-actions/actions/build/npm@v0.0.11-b
       if: ${{ inputs.build-tool == 'npm'}}
       with:
         app-type: ${{ inputs.app-type }}
@@ -51,17 +51,17 @@ runs:
         sentry-project: ${{ inputs.sentry-project }}
         with-storybook: ${{ inputs.with-storybook }}
 
-    - uses: gustavogarayalde/github-actions/actions/publish/maven@v0.0.11
+    - uses: gustavogarayalde/github-actions/actions/publish/maven@v0.0.11-b
       if: ${{ inputs.repository == 'maven'}}
       with:
         token: ${{ inputs.token }}
 
-    - uses: gustavogarayalde/github-actions/actions/publish/npm@v0.0.11
+    - uses: gustavogarayalde/github-actions/actions/publish/npm@v0.0.11-b
       if: ${{ inputs.repository == 'npm'}}
       with:
         token: ${{ inputs.token }}
 
-    - uses: gustavogarayalde/github-actions/actions/publish/docker@v0.0.11
+    - uses: gustavogarayalde/github-actions/actions/publish/docker@v0.0.11-b
       if: ${{ inputs.repository == 'docker' || inputs.with-storybook == 'true' }}
       with:
         token: ${{ inputs.token }}

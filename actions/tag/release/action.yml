@@ -18,14 +18,14 @@ runs:
   steps:
     - uses: actions/checkout@v3
 
-    - uses: gustavogarayalde/github-actions/actions/build/maven@v0.0.11
+    - uses: gustavogarayalde/github-actions/actions/build/maven@v0.0.11-b
       name: Maven Build
       if: ${{ inputs.build-tool == 'maven'}}
       with:
         settings-url: ${{ inputs.settings-url }}
         token: ${{ inputs.token }}
 
-    - uses: gustavogarayalde/github-actions/actions/build/npm@v0.0.11
+    - uses: gustavogarayalde/github-actions/actions/build/npm@v0.0.11-b
       name: NPM Build
       if: ${{ inputs.build-tool == 'npm'}}
       with:
@@ -39,13 +39,13 @@ runs:
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
 
-    - uses: gustavogarayalde/github-actions/actions/release/maven@v0.0.11
+    - uses: gustavogarayalde/github-actions/actions/release/maven@v0.0.11-b
       name: Maven Release
       if: ${{ inputs.build-tool == 'maven'}}
       with:
         token: ${{ github.token }}
 
-    - uses: gustavogarayalde/github-actions/actions/release/npm@v0.0.11
+    - uses: gustavogarayalde/github-actions/actions/release/npm@v0.0.11-b
       name: NPM Release
       if: ${{ inputs.build-tool == 'npm'}}
 

@@ -23,7 +23,7 @@ runs:
       with:
         ref: ${{ github.event.pull_request.head.ref }}
 
-    - uses: gustavogarayalde/github-actions/actions/build/maven@v0.0.11
+    - uses: gustavogarayalde/github-actions/actions/build/maven@v0.0.11-b
       name: Maven Build
       if: ${{ inputs.build-tool == 'maven' }}
       with:
@@ -31,7 +31,7 @@ runs:
         token: ${{ inputs.token }}
         comment-pr-with-coverage: "true"
 
-    - uses: gustavogarayalde/github-actions/actions/build/npm@v0.0.11
+    - uses: gustavogarayalde/github-actions/actions/build/npm@v0.0.11-b
       name: NPM Build
       if: ${{ inputs.build-tool == 'npm' }}
       with:
