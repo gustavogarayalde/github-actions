@@ -13,3 +13,20 @@ runs:
         mvn deploy -DaltDeploymentRepository=github::default::https://maven.pkg.github.com/${{ github.repository }}
       env:
         GITHUB_TOKEN: ${{ inputs.token }}
+
+    - name: Summary
+      shell: bash
+      run: |
+        echo "## 📦 Maven Package Published" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Repository:** \`https://maven.pkg.github.com/${{ github.repository }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "**Version:** \`${{ env.LATEST_TAG }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Installation:**" >> $GITHUB_STEP_SUMMARY
+        echo "\`\`\`xml" >> $GITHUB_STEP_SUMMARY
+        echo "<dependency>" >> $GITHUB_STEP_SUMMARY
+        echo "    <groupId><!-- your-group-id --></groupId>" >> $GITHUB_STEP_SUMMARY
+        echo "    <artifactId><!-- your-artifact-id --></artifactId>" >> $GITHUB_STEP_SUMMARY
+        echo "    <version>${{ env.LATEST_TAG }}</version>" >> $GITHUB_STEP_SUMMARY
+        echo "</dependency>" >> $GITHUB_STEP_SUMMARY
+        echo "\`\`\`" >> $GITHUB_STEP_SUMMARY

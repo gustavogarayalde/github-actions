@@ -23,7 +23,7 @@ runs:
       if: ${{ inputs.app-type == 'next-js' }}
       shell: bash
       run: |
-        curl -o start.sh https://raw.githubusercontent.com/gustavogarayalde/github-actions/v0.0.19/dockerfiles/${{ inputs.app-type }}/start.sh
+        curl -o start.sh https://raw.githubusercontent.com/gustavogarayalde/github-actions/v0.0.20/dockerfiles/${{ inputs.app-type }}/start.sh
         chmod +x start.sh
 
     - name: Build and push
@@ -31,6 +31,19 @@ runs:
       with:
         context: .
         push: true
-        file: https://raw.githubusercontent.com/gustavogarayalde/github-actions/v0.0.19/dockerfiles/${{ inputs.app-type }}/Dockerfile
+        file: https://raw.githubusercontent.com/gustavogarayalde/github-actions/v0.0.20/dockerfiles/${{ inputs.app-type }}/Dockerfile
         tags: ghcr.io/${{ github.repository }}/${{ github.event.repository.name }}:${{ env.LATEST_TAG }}
         github-token: ${{ inputs.token }}
+
+    - name: Summary
+      shell: bash
+      run: |
+        echo "## 🐳 Docker Image Published" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Image:** \`ghcr.io/${{ github.repository }}/${{ github.event.repository.name }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "**Tag:** \`${{ env.LATEST_TAG }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Full Image:**" >> $GITHUB_STEP_SUMMARY
+        echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+        echo "ghcr.io/${{ github.repository }}/${{ github.event.repository.name }}:${{ env.LATEST_TAG }}" >> $GITHUB_STEP_SUMMARY
+        echo "\`\`\`" >> $GITHUB_STEP_SUMMARY

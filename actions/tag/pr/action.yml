@@ -42,7 +42,7 @@ runs:
         npm version prerelease --preid=pr-${{ env.PR_NUMBER }}
         git push
 
-    - uses: gustavogarayalde/github-actions/actions/tag/pr/gradle@v0.0.19
+    - uses: gustavogarayalde/github-actions/actions/tag/pr/gradle@v0.0.20
       if: ${{ inputs.build-tool == 'gradle' }}
       with:
         app-type: ${{ inputs.app-type }}
