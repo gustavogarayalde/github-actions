@@ -36,6 +36,17 @@ runs:
         track: ${{ inputs.track }}
         status: completed
 
+    - name: Summary
+      shell: bash
+      run: |
+        echo "## 📱 Android App Published to Google Play" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Package:** \`${{ inputs.package-name }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "**Track:** \`${{ inputs.track }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "**Version:** \`${{ env.LATEST_TAG }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "🎉 The app has been published to the **${{ inputs.track }}** track." >> $GITHUB_STEP_SUMMARY
+
     - name: Clean up credentials
       if: always()
       shell: bash

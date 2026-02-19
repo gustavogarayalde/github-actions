@@ -19,7 +19,7 @@ runs:
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
 
-    - uses: gustavogarayalde/github-actions/actions/tag/pr@v0.0.19
+    - uses: gustavogarayalde/github-actions/actions/tag/pr@v0.0.20
       name: Tag PR
       if: ${{ github.event_name == 'pull_request' }}
       with:
@@ -27,7 +27,7 @@ runs:
         build-tool: ${{ inputs.build-tool }}
         token: ${{ inputs.token }}
 
-    - uses: gustavogarayalde/github-actions/actions/release@v0.0.19
+    - uses: gustavogarayalde/github-actions/actions/release@v0.0.20
       name: Release
       if: ${{ github.event_name != 'pull_request' }}
       with:
