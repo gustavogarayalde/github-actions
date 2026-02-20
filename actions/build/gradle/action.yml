@@ -34,6 +34,15 @@ runs:
       shell: bash
       run: ./gradlew test lint --stacktrace
 
+    - name: Build Android Debug APK
+      shell: bash
+      run: |
+        if [ "${{ inputs.skip-tests }}" == "true" ]; then
+          ./gradlew assembleDebug -x test -x lint --stacktrace
+        else
+          ./gradlew assembleDebug --stacktrace
+        fi
+
     - name: Build Android Release APK
       shell: bash
       run: |
@@ -41,6 +50,15 @@ runs:
           ./gradlew assembleRelease -x test -x lint --stacktrace
         else
           ./gradlew assembleRelease --stacktrace
+        fi
+
+    - name: Build Android Debug Bundle
+      shell: bash
+      run: |
+        if [ "${{ inputs.skip-tests }}" == "true" ]; then
+          ./gradlew bundleDebug -x test -x lint --stacktrace
+        else
+          ./gradlew bundleDebug --stacktrace
         fi
 
     - name: Build Android Release Bundle
@@ -52,16 +70,12 @@ runs:
           ./gradlew bundleRelease --stacktrace
         fi
 
-    - name: Upload APK artifact
+    - name: Upload Android artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: android-apk
+        name: android-builds
         path: |
+          **/build/outputs/apk/debug/*.apk
           **/build/outputs/apk/release/*.apk
-
-    - name: Upload Bundle artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: android-bundle
-        path: |
+          **/build/outputs/bundle/debug/*.aab
           **/build/outputs/bundle/release/*.aab
