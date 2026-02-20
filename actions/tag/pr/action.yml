@@ -26,7 +26,7 @@ runs:
         ref: ${{ github.event.pull_request.head.ref }}
 
     - name: Tag Version
-      if: ${{ inputs.build-tool == 'maven' || inputs.app-type == 'next-js'}}
+      if: ${{ inputs.build-tool == 'maven' || inputs.app-type == 'next-js' || inputs.build-tool == 'gradle' }}
       shell: bash
       run: git tag -a pr-${{ env.PR_NUMBER }}-$GITHUB_RUN_NUMBER -m "pr-${{ env.PR_NUMBER }}-$GITHUB_RUN_NUMBER"
 
@@ -41,10 +41,3 @@ runs:
       run: |
         npm version prerelease --preid=pr-${{ env.PR_NUMBER }}
         git push
-
-    - uses: gustavogarayalde/github-actions/actions/tag/pr/gradle@v0.0.21
-      if: ${{ inputs.build-tool == 'gradle' }}
-      with:
-        app-type: ${{ inputs.app-type }}
-        build-tool: ${{ inputs.build-tool }}
-        token: ${{ inputs.token }}
