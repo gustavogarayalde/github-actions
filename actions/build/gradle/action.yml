@@ -29,27 +29,28 @@ runs:
     - name: Validate Gradle wrapper
       uses: gradle/wrapper-validation-action@v1
 
-    - name: Run Gradle Build
-      shell: bash
-      run: |
-        if [ "${{ inputs.skip-tests }}" == "true" ]; then
-          ./gradlew build -x test -x lint --stacktrace
-        else
-          ./gradlew build --stacktrace
-        fi
-
-    - name: Run Tests
+    - name: Run Tests and Lint
       if: ${{ inputs.skip-tests != 'true' }}
       shell: bash
-      run: ./gradlew test --stacktrace
+      run: ./gradlew test lint --stacktrace
 
     - name: Build Android Release APK
       shell: bash
-      run: ./gradlew assembleRelease --stacktrace
+      run: |
+        if [ "${{ inputs.skip-tests }}" == "true" ]; then
+          ./gradlew assembleRelease -x test -x lint --stacktrace
+        else
+          ./gradlew assembleRelease --stacktrace
+        fi
 
     - name: Build Android Release Bundle
       shell: bash
-      run: ./gradlew bundleRelease --stacktrace
+      run: |
+        if [ "${{ inputs.skip-tests }}" == "true" ]; then
+          ./gradlew bundleRelease -x test -x lint --stacktrace
+        else
+          ./gradlew bundleRelease --stacktrace
+        fi
 
     - name: Upload APK artifact
       uses: actions/upload-artifact@v4
