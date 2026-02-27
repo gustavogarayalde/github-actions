@@ -42,10 +42,10 @@ runs:
         token: ${{ inputs.token }}
         app-type: ${{ inputs.app-type }}
 
-    - uses: gustavogarayalde/github-actions/actions/publish/google-play@v0.0.22
-      if: ${{ inputs.repository == 'google-play' && github.ref == 'refs/heads/main' }}
-      with:
-        token: ${{ inputs.token }}
-        service-account-json: ${{ inputs.service-account-json }}
-        package-name: ${{ inputs.package-name }}
-        track: ${{ inputs.track }}
+    # - uses: gustavogarayalde/github-actions/actions/publish/google-play@v0.0.22
+    #   if: ${{ inputs.repository == 'google-play' && github.ref == 'refs/heads/main' }}
+    #   with:
+    #     token: ${{ inputs.token }}
+    #     service-account-json: ${{ inputs.service-account-json }}
+    #     package-name: ${{ inputs.package-name }}
+    #     track: ${{ inputs.track }}
