@@ -40,6 +40,18 @@ inputs:
     description: "Release track: internal | alpha | beta | production"
     required: false
     default: "internal"
+  keystore:
+    description: "Android Keystore file (base64 encoded)"
+    required: false
+  keystore-password:
+    description: "Keystore password"
+    required: false
+  key-alias:
+    description: "Key alias"
+    required: false
+  key-password:
+    description: "Key password"
+    required: false
 
 runs:
   using: "composite"
@@ -61,6 +73,10 @@ runs:
         sentry-project: ${{ inputs.sentry-project }}
         with-storybook: ${{ inputs.with-storybook }}
         skip-tests: ${{ inputs.skip-tests }}
+        keystore: ${{ inputs.keystore }}
+        keystore-password: ${{ inputs.keystore-password }}
+        key-alias: ${{ inputs.key-alias }}
+        key-password: ${{ inputs.key-password }}
 
     - uses: gustavogarayalde/github-actions/actions/tag@v0.0.23
       with:

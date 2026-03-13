@@ -23,3 +23,8 @@ jobs:
         # service-account-json: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
         # package-name: com.yourcompany.yourapp
         # track: internal # internal | alpha | beta | production
+        # Android signing parameters (required for signed releases):
+        # keystore: ${{ secrets.ANDROID_KEYSTORE }}
+        # keystore-password: ${{ secrets.KEYSTORE_PASSWORD }}
+        # key-alias: ${{ secrets.KEY_ALIAS }}
+        # key-password: ${{ secrets.KEY_PASSWORD }}

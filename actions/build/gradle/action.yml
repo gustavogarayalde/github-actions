@@ -7,6 +7,18 @@ inputs:
     description: "true | false"
     required: false
     default: "false"
+  keystore:
+    description: "Android Keystore file (base64 encoded)"
+    required: false
+  keystore-password:
+    description: "Keystore password"
+    required: false
+  key-alias:
+    description: "Key alias"
+    required: false
+  key-password:
+    description: "Key password"
+    required: false
 
 runs:
   using: "composite"
@@ -29,6 +41,16 @@ runs:
     - name: Validate Gradle wrapper
       uses: gradle/wrapper-validation-action@v1
 
+    - name: Decode Keystore
+      if: ${{ inputs.keystore != '' }}
+      shell: bash
+      run: |
+        echo "${{ inputs.keystore }}" | base64 -d > ${{ github.workspace }}/release.keystore
+        echo "KEYSTORE_FILE=${{ github.workspace }}/release.keystore" >> $GITHUB_ENV
+        echo "KEYSTORE_PASSWORD=${{ inputs.keystore-password }}" >> $GITHUB_ENV
+        echo "KEY_ALIAS=${{ inputs.key-alias }}" >> $GITHUB_ENV
+        echo "KEY_PASSWORD=${{ inputs.key-password }}" >> $GITHUB_ENV
+
     - name: Run Tests and Lint
       if: ${{ inputs.skip-tests != 'true' }}
       shell: bash
@@ -46,10 +68,20 @@ runs:
     - name: Build Android Release APK
       shell: bash
       run: |
+        GRADLE_ARGS=""
         if [ "${{ inputs.skip-tests }}" == "true" ]; then
-          ./gradlew assembleRelease -x test -x lint --stacktrace
+          GRADLE_ARGS="-x test -x lint"
+        fi
+        
+        if [ -n "${{ inputs.keystore }}" ]; then
+          ./gradlew assembleRelease $GRADLE_ARGS \
+            -Pandroid.injected.signing.store.file=$KEYSTORE_FILE \
+            -Pandroid.injected.signing.store.password=$KEYSTORE_PASSWORD \
+            -Pandroid.injected.signing.key.alias=$KEY_ALIAS \
+            -Pandroid.injected.signing.key.password=$KEY_PASSWORD \
+            --stacktrace
         else
-          ./gradlew assembleRelease --stacktrace
+          ./gradlew assembleRelease $GRADLE_ARGS --stacktrace
         fi
 
     - name: Build Android Debug Bundle
@@ -64,10 +96,20 @@ runs:
     - name: Build Android Release Bundle
       shell: bash
       run: |
+        GRADLE_ARGS=""
         if [ "${{ inputs.skip-tests }}" == "true" ]; then
-          ./gradlew bundleRelease -x test -x lint --stacktrace
+          GRADLE_ARGS="-x test -x lint"
+        fi
+        
+        if [ -n "${{ inputs.keystore }}" ]; then
+          ./gradlew bundleRelease $GRADLE_ARGS \
+            -Pandroid.injected.signing.store.file=$KEYSTORE_FILE \
+            -Pandroid.injected.signing.store.password=$KEYSTORE_PASSWORD \
+            -Pandroid.injected.signing.key.alias=$KEY_ALIAS \
+            -Pandroid.injected.signing.key.password=$KEY_PASSWORD \
+            --stacktrace
         else
-          ./gradlew bundleRelease --stacktrace
+          ./gradlew bundleRelease $GRADLE_ARGS --stacktrace
         fi
 
     - name: Upload Android artifacts
@@ -79,3 +121,8 @@ runs:
           **/build/outputs/apk/release/*.apk
           **/build/outputs/bundle/debug/*.aab
           **/build/outputs/bundle/release/*.aab
+
+    - name: Clean up keystore
+      if: always()
+      shell: bash
+      run: rm -f ${{ github.workspace }}/release.keystore

@@ -27,6 +27,18 @@ inputs:
   skip-tests:
     description: "true | false"
     required: false
+  keystore:
+    description: "Android Keystore file (base64 encoded)"
+    required: false
+  keystore-password:
+    description: "Keystore password"
+    required: false
+  key-alias:
+    description: "Key alias"
+    required: false
+  key-password:
+    description: "Key password"
+    required: false
 
 runs:
   using: "composite"
@@ -53,3 +65,7 @@ runs:
       with:
         token: ${{ inputs.token }}
         skip-tests: ${{ inputs.skip-tests }}
+        keystore: ${{ inputs.keystore }}
+        keystore-password: ${{ inputs.keystore-password }}
+        key-alias: ${{ inputs.key-alias }}
+        key-password: ${{ inputs.key-password }}
