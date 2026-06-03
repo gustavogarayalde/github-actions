@@ -39,7 +39,9 @@ runs:
     - name: Build Storybook
       if: ${{ inputs.with-storybook == 'true' }}
       shell: bash
-      run: npm run build-storybook
+      run: |
+        npm install --legacy-peer-deps
+        npm run build-storybook
 
     - uses: gustavogarayalde/github-actions/actions/publish/docker@v0.0.24
       if: ${{ inputs.repository == 'docker' || inputs.with-storybook == 'true' }}
