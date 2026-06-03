@@ -101,11 +101,6 @@ runs:
         skip-step: all
         annotations: none
 
-    - name: Build Storybook
-      if: ${{ inputs.with-storybook == 'true' }}
-      shell: bash
-      run: npm run build-storybook
-
     - name: Create Sentry release
       uses: getsentry/action-release@v1
       if: ${{ inputs.sentry-token != '' }}
