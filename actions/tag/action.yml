@@ -37,6 +37,7 @@ runs:
 
     - uses: actions/checkout@v3
       name: Checkout prepare push tag
+      if: ${{ github.event_name != 'pull_request' || inputs.app-type != 'npm-ui-lib' }}
       with:
         token: ${{ inputs.token }}
         clean: "false"

@@ -41,4 +41,4 @@ runs:
       run: |
         CURRENT_VERSION=$(node -p "require('./package.json').version")
         BASE_VERSION=${CURRENT_VERSION%%-*}
-        npm version "$BASE_VERSION-pr.${{ env.PR_NUMBER }}.$GITHUB_RUN_NUMBER" --no-git-tag-version
+        npm version "$BASE_VERSION-pr.${{ env.PR_NUMBER }}.$GITHUB_RUN_NUMBER" --tag-version-prefix=""
