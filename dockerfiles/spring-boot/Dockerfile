@@ -1,4 +1,4 @@
-FROM amazoncorretto:21-alpine
+FROM amazoncorretto:25-alpine
 ARG JAR_FILE=target/api.jar
 ARG OTEL_AGENT_VERSION=2.24.0
 RUN apk add --no-cache curl \
