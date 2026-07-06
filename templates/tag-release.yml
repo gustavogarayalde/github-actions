@@ -17,7 +17,7 @@ jobs:
         token: ${{ secrets.PAT }}
         build-tool: maven # maven | npm | gradle
         repository: maven # maven | npm | docker | google-play
-        app-type: spring-boot # spring-boot | npm-ui-lib | android-app
+        app-type: spring-boot # spring-boot | next-js | vite | npm-ui-lib | android-app
         settings-url: raw.githubusercontent.com/OWNER/devops/main/maven/settings.xml # only for maven build-tool
         # Android-specific parameters (only for gradle build-tool & google-play repository):
         # service-account-json: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}

@@ -4,7 +4,7 @@ inputs:
     description: "A Github Token"
     required: true
   app-type:
-    description: "spring-boot | npm-ui-lib | android-app"
+    description: "spring-boot | next-js | vite | npm-ui-lib | android-app"
     required: true
   repository:
     description: "docker | maven | npm | google-play"
@@ -26,12 +26,12 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: gustavogarayalde/github-actions/actions/publish/maven@v0.0.26
+    - uses: gustavogarayalde/github-actions/actions/publish/maven@v0.0.27
       if: ${{ inputs.repository == 'maven'}}
       with:
         token: ${{ inputs.token }}
 
-    - uses: gustavogarayalde/github-actions/actions/publish/npm@v0.0.26
+    - uses: gustavogarayalde/github-actions/actions/publish/npm@v0.0.27
       if: ${{ inputs.repository == 'npm'}}
       with:
         token: ${{ inputs.token }}
@@ -43,13 +43,13 @@ runs:
         npm install --legacy-peer-deps
         npm run build-storybook
 
-    - uses: gustavogarayalde/github-actions/actions/publish/docker@v0.0.26
+    - uses: gustavogarayalde/github-actions/actions/publish/docker@v0.0.27
       if: ${{ inputs.repository == 'docker' || inputs.with-storybook == 'true' }}
       with:
         token: ${{ inputs.token }}
         app-type: ${{ inputs.app-type }}
 
-    - uses: gustavogarayalde/github-actions/actions/publish/google-play@v0.0.26
+    - uses: gustavogarayalde/github-actions/actions/publish/google-play@v0.0.27
       if: ${{ inputs.repository == 'google-play' && github.ref == 'refs/heads/main' }}
       with:
         token: ${{ inputs.token }}

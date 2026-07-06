@@ -4,7 +4,7 @@ inputs:
     description: "Github Token"
     required: true
   app-type:
-    description: "spring-boot | npm-ui-lib"
+    description: "next-js | vite | npm-ui-lib"
     required: false
   sentry-token:
     description: "Sentry Auth Token"
@@ -46,8 +46,9 @@ runs:
       with:
         path: |
           ${{ steps.npm-cache-dir.outputs.dir }}
-          ${{ github.workspace }}/.next/cache
           ${{ github.workspace }}/node_modules
+          ${{ github.workspace }}/.next/cache
+          ${{ github.workspace }}/node_modules/.vite
         key: ${{ runner.os }}-node-${{ env.PACKAGE_LOCK_FILE_HASH }}-${{ env.PACKAGE_LOCK_FILE_HASH }}
         restore-keys: |
           ${{ runner.os }}-node-${{ env.PACKAGE_LOCK_FILE_HASH }}-
@@ -110,6 +111,6 @@ runs:
         SENTRY_PROJECT: ${{ inputs.sentry-project }}
       with:
         version: ${{ env.LATEST_TAG }}
-        sourcemaps: .next
+        sourcemaps: ${{ inputs.app-type == 'vite' && 'dist' || '.next' }}
         ignore_missing: "true"
         ignore_empty: "true"

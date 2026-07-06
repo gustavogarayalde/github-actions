@@ -7,7 +7,7 @@ inputs:
     description: "maven | npm | gradle"
     required: true
   app-type:
-    description: "spring-boot | npm-ui-lib | android-app"
+    description: "spring-boot | next-js | vite | npm-ui-lib | android-app"
     required: false
 
 runs:
@@ -19,7 +19,7 @@ runs:
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
 
-    - uses: gustavogarayalde/github-actions/actions/tag/pr@v0.0.26
+    - uses: gustavogarayalde/github-actions/actions/tag/pr@v0.0.27
       name: Tag PR
       if: ${{ github.event_name == 'pull_request' }}
       with:
@@ -27,7 +27,7 @@ runs:
         build-tool: ${{ inputs.build-tool }}
         token: ${{ inputs.token }}
 
-    - uses: gustavogarayalde/github-actions/actions/release@v0.0.26
+    - uses: gustavogarayalde/github-actions/actions/release@v0.0.27
       name: Release
       if: ${{ github.event_name != 'pull_request' }}
       with:

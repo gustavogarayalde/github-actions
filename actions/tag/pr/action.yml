@@ -1,7 +1,7 @@
 name: "Tag"
 inputs:
   app-type:
-    description: "spring-boot | npm-ui-lib | android-app"
+    description: "spring-boot | next-js | vite | npm-ui-lib | android-app"
     required: false
   build-tool:
     description: "maven | npm | gradle"
@@ -26,7 +26,7 @@ runs:
         ref: ${{ github.event.pull_request.head.ref }}
 
     - name: Tag Version
-      if: ${{ inputs.build-tool == 'maven' || inputs.app-type == 'next-js' || inputs.build-tool == 'gradle' }}
+      if: ${{ inputs.build-tool == 'maven' || inputs.app-type == 'next-js' || inputs.app-type == 'vite' || inputs.build-tool == 'gradle' }}
       shell: bash
       run: git tag -a pr-${{ env.PR_NUMBER }}-$GITHUB_RUN_NUMBER -m "pr-${{ env.PR_NUMBER }}-$GITHUB_RUN_NUMBER"
 
