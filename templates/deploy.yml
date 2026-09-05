@@ -1,0 +1,51 @@
+name: Deploy
+run-name: Deploy ${{ github.repository }} to ${{ inputs.environment }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Environment to deploy
+        required: true
+        type: environment
+      local-directory:
+        description: Repository-relative directory containing .env.<environment> and docker-compose.yml
+        required: true
+        default: .
+        type: string
+      remote-directory:
+        description: Absolute directory containing .env and docker-compose.yml on the server
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-${{ github.repository }}-${{ inputs.environment }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to ${{ inputs.environment }}
+    environment: ${{ inputs.environment }}
+    # Set the repository variable DEPLOY_RUNNER to a custom self-hosted runner
+    # label when the server is only reachable from a private network or VPN.
+    runs-on: ${{ vars.DEPLOY_RUNNER || 'ubuntu-latest' }}
+    timeout-minutes: 20
+
+    steps:
+      - name: Deploy
+        uses: gustavogarayalde/github-actions/actions/deploy@versionTag
+        with:
+          environment: ${{ inputs.environment }}
+          local-directory: ${{ inputs.local-directory }}
+          remote-directory: ${{ inputs.remote-directory }}
+          ssh-host: ${{ secrets.SSH_HOST }}
+          ssh-user: ${{ secrets.SSH_USER }}
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh-port: ${{ secrets.SSH_PORT || '22' }}
+          ssh-known-hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+          vpn-config-base64: ${{ secrets.VPN_CONFIG_BASE64 }}
+          vpn-username: ${{ secrets.VPN_USERNAME }}
+          vpn-password: ${{ secrets.VPN_PASSWORD }}
