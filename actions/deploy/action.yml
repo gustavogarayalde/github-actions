@@ -1,0 +1,128 @@
+name: "Deploy with Docker Compose"
+description: "Updates a remote dotenv file and Docker Compose definition, then deploys over SSH"
+
+inputs:
+  environment:
+    description: "Environment name; selects the local .env.<environment> file"
+    required: true
+  local-directory:
+    description: "Repository-relative directory containing .env.<environment> and docker-compose.yml"
+    required: false
+    default: "."
+  remote-directory:
+    description: "Absolute server directory containing .env and docker-compose.yml"
+    required: true
+  ssh-host:
+    description: "SSH server hostname or IPv4 address"
+    required: true
+  ssh-user:
+    description: "SSH user"
+    required: true
+  ssh-private-key:
+    description: "Private key used to connect to the server"
+    required: true
+  ssh-port:
+    description: "SSH port"
+    required: false
+    default: "22"
+  ssh-known-hosts:
+    description: "Optional known_hosts entry for strict server identity verification"
+    required: false
+  vpn-config-base64:
+    description: "Optional base64-encoded, self-contained OpenVPN profile"
+    required: false
+  vpn-username:
+    description: "Optional OpenVPN username"
+    required: false
+  vpn-password:
+    description: "Optional OpenVPN password"
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Connect to VPN
+      if: ${{ inputs.vpn-config-base64 != '' }}
+      shell: bash
+      env:
+        VPN_CONFIG_BASE64: ${{ inputs.vpn-config-base64 }}
+        VPN_USERNAME: ${{ inputs.vpn-username }}
+        VPN_PASSWORD: ${{ inputs.vpn-password }}
+        VPN_TARGET_HOST: ${{ inputs.ssh-host }}
+        VPN_TARGET_PORT: ${{ inputs.ssh-port }}
+      run: |
+        set -Eeuo pipefail
+
+        if [[ -n "$VPN_USERNAME" || -n "$VPN_PASSWORD" ]]; then
+          if [[ -z "$VPN_USERNAME" || -z "$VPN_PASSWORD" ]]; then
+            echo "::error::vpn-username and vpn-password must both be configured."
+            exit 1
+          fi
+        fi
+
+        sudo apt-get update
+        sudo apt-get install --yes openvpn
+
+        vpn_config="$RUNNER_TEMP/client.ovpn"
+        vpn_credentials="$RUNNER_TEMP/openvpn-credentials"
+        vpn_log="$RUNNER_TEMP/openvpn.log"
+        vpn_pid="$RUNNER_TEMP/openvpn.pid"
+
+        printf '%s' "$VPN_CONFIG_BASE64" | base64 --decode > "$vpn_config"
+        chmod 600 "$vpn_config"
+
+        openvpn_arguments=(
+          --config "$vpn_config"
+          --daemon
+          --auth-nocache
+          --writepid "$vpn_pid"
+          --log "$vpn_log"
+        )
+
+        if [[ -n "$VPN_USERNAME" ]]; then
+          printf '%s\n%s\n' "$VPN_USERNAME" "$VPN_PASSWORD" > "$vpn_credentials"
+          chmod 600 "$vpn_credentials"
+          openvpn_arguments+=(--auth-user-pass "$vpn_credentials")
+        fi
+
+        sudo openvpn "${openvpn_arguments[@]}"
+
+        for attempt in {1..30}; do
+          if ssh-keyscan \
+            -T 3 \
+            -p "$VPN_TARGET_PORT" \
+            "$VPN_TARGET_HOST" >/dev/null 2>&1; then
+            echo "VPN connected and SSH server reachable."
+            exit 0
+          fi
+          sleep 2
+        done
+
+        echo "::error::The SSH server is not reachable through the VPN."
+        sudo tail -n 50 "$vpn_log" || true
+        exit 1
+
+    - name: Deploy application
+      shell: bash
+      env:
+        DEPLOY_ENVIRONMENT: ${{ inputs.environment }}
+        DEPLOY_LOCAL_DIRECTORY: ${{ inputs.local-directory }}
+        DEPLOY_REMOTE_DIRECTORY: ${{ inputs.remote-directory }}
+        DEPLOY_SSH_HOST: ${{ inputs.ssh-host }}
+        DEPLOY_SSH_USER: ${{ inputs.ssh-user }}
+        DEPLOY_SSH_PRIVATE_KEY: ${{ inputs.ssh-private-key }}
+        DEPLOY_SSH_PORT: ${{ inputs.ssh-port }}
+        DEPLOY_SSH_KNOWN_HOSTS: ${{ inputs.ssh-known-hosts }}
+      run: bash "$GITHUB_ACTION_PATH/deploy.sh"
+
+    - name: Disconnect VPN
+      if: ${{ always() && inputs.vpn-config-base64 != '' }}
+      shell: bash
+      run: |
+        vpn_pid="$RUNNER_TEMP/openvpn.pid"
+        if [[ -f "$vpn_pid" ]]; then
+          sudo kill "$(sudo cat "$vpn_pid")" || true
+        fi
