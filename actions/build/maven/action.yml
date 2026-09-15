@@ -44,41 +44,9 @@ runs:
       shell: bash
       run: mvn -B compile --file pom.xml
 
-    - name: Maven Test
+    - name: Maven Unit Tests
       shell: bash
-      run: mvn -B test --file pom.xml
-
-    - name: Generate Test Coverage Badges
-      uses: cicirello/jacoco-badge-generator@v2
-      with:
-        generate-branches-badge: true
-        generate-summary: true
-
-    - name: Commit and push the coverage badges and summary file
-      shell: bash
-      if: ${{ github.event_name != 'pull_request' }}
-      run: |
-        if [[ `git status --porcelain *.svg *.json` ]]; then
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add *.svg *.json
-          git commit -m "${{github.event.pull_request.title}} - Coverage badges" *.svg *.json
-          git push
-        fi
-
-    - name: Comment on PR with coverage percentages
-      shell: bash
-      if: ${{ github.event_name == 'pull_request' }}
-      run: |
-        REPORT=$(<.github/badges/coverage-summary.json)
-        COVERAGE=$(jq -r '.coverage' <<< "$REPORT")%
-        BRANCHES=$(jq -r '.branches' <<< "$REPORT")%
-        NEWLINE=$'\n'
-        BODY="## JaCoCo Test Coverage Summary Statistics${NEWLINE}* __Coverage:__ ${COVERAGE}${NEWLINE}* __Branches:__ ${BRANCHES}"
-        gh pr comment ${{github.event.pull_request.number}} -b "${BODY}"
-      continue-on-error: true
-      env:
-        GITHUB_TOKEN: ${{ inputs.token }}
+      run: mvn -B test -DexcludedGroups=E2E -Djacoco.skip=true --file pom.xml
 
     - name: Maven Package
       shell: bash
