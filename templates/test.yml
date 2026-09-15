@@ -16,3 +16,6 @@ jobs:
         with:
           token: ${{ secrets.PAT }}
           settings-url: raw.githubusercontent.com/OWNER/devops/main/maven/settings.xml
+          docker-images: |
+            IMAGE_NAME:IMAGE_TAG
+            testcontainers/ryuk:0.14.0

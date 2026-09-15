@@ -7,6 +7,10 @@ inputs:
   token:
     description: "Github Token"
     required: false
+  docker-images:
+    description: "Newline-separated Docker images used by Testcontainers"
+    required: false
+    default: ""
 
 runs:
   using: "composite"
@@ -43,6 +47,39 @@ runs:
     - name: Maven Validate
       shell: bash
       run: mvn validate --file pom.xml
+
+    - name: Calculate Testcontainers image cache key
+      id: testcontainers-image-key
+      if: ${{ inputs.docker-images != '' }}
+      shell: bash
+      env:
+        DOCKER_IMAGES: ${{ inputs.docker-images }}
+      run: |
+        IMAGE_HASH=$(printf '%s' "$DOCKER_IMAGES" | sha256sum | cut -d ' ' -f 1)
+        echo "hash=$IMAGE_HASH" >> "$GITHUB_OUTPUT"
+
+    - name: Restore Testcontainers images
+      id: testcontainers-image-cache
+      if: ${{ inputs.docker-images != '' }}
+      uses: actions/cache@v4
+      with:
+        path: ${{ runner.temp }}/testcontainers-images.tar
+        key: testcontainers-${{ runner.os }}-${{ runner.arch }}-${{ steps.testcontainers-image-key.outputs.hash }}
+
+    - name: Load cached Testcontainers images
+      if: ${{ inputs.docker-images != '' && steps.testcontainers-image-cache.outputs.cache-hit == 'true' }}
+      shell: bash
+      run: docker load --input "${{ runner.temp }}/testcontainers-images.tar"
+
+    - name: Pull and cache Testcontainers images
+      if: ${{ inputs.docker-images != '' && steps.testcontainers-image-cache.outputs.cache-hit != 'true' }}
+      shell: bash
+      env:
+        DOCKER_IMAGES: ${{ inputs.docker-images }}
+      run: |
+        mapfile -t IMAGES < <(printf '%s\n' "$DOCKER_IMAGES" | sed '/^[[:space:]]*$/d')
+        printf '%s\n' "${IMAGES[@]}" | xargs -n 1 -P 4 docker pull
+        docker save --output "${{ runner.temp }}/testcontainers-images.tar" "${IMAGES[@]}"
 
     - name: Maven Unit and E2E Tests
       shell: bash
