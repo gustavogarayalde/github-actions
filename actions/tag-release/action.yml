@@ -56,13 +56,18 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: gustavogarayalde/github-actions/actions/checkout@v0.0.30
+    - uses: gustavogarayalde/github-actions/actions/checkout@v0.0.31
+
+    - name: Sync branch before releasing
+      if: ${{ github.event_name != 'pull_request' }}
+      shell: bash
+      run: git pull --ff-only origin "$GITHUB_REF_NAME"
 
     - name: Disable git hooks
       shell: bash
       run: git config --global core.hooksPath /dev/null
 
-    - uses: gustavogarayalde/github-actions/actions/build@v0.0.30
+    - uses: gustavogarayalde/github-actions/actions/build@v0.0.31
       with:
         settings-url: ${{ inputs.settings-url }}
         token: ${{ inputs.token }}
@@ -78,7 +83,7 @@ runs:
         key-alias: ${{ inputs.key-alias }}
         key-password: ${{ inputs.key-password }}
 
-    - uses: gustavogarayalde/github-actions/actions/tag@v0.0.30
+    - uses: gustavogarayalde/github-actions/actions/tag@v0.0.31
       with:
         settings-url: ${{ inputs.settings-url }}
         token: ${{ inputs.token }}
@@ -90,7 +95,7 @@ runs:
         with-storybook: ${{ inputs.with-storybook }}
         skip-tests: ${{ inputs.skip-tests }}
 
-    - uses: gustavogarayalde/github-actions/actions/publish@v0.0.30
+    - uses: gustavogarayalde/github-actions/actions/publish@v0.0.31
       with:
         token: ${{ inputs.token }}
         app-type: ${{ inputs.app-type }}

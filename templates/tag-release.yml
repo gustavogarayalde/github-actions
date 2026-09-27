@@ -8,6 +8,13 @@ on:
 permissions:
   contents: write
 
+# This workflow and test both push commits to the current branch. Using the
+# same concurrency group prevents non-fast-forward failures between them.
+concurrency:
+  group: repository-write-${{ github.ref }}
+  cancel-in-progress: false
+  queue: max
+
 jobs:
   tag-release:
     runs-on: ubuntu-latest

@@ -8,6 +8,14 @@ on:
 permissions:
   contents: write
 
+# This workflow and tag-release both push commits to the current branch. Using
+# the same concurrency group makes the second workflow wait and check out the
+# branch only after the first push has completed.
+concurrency:
+  group: repository-write-${{ github.ref }}
+  cancel-in-progress: false
+  queue: max
+
 jobs:
   test:
     runs-on: ubuntu-latest
