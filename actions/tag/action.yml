@@ -19,7 +19,7 @@ runs:
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
 
-    - uses: gustavogarayalde/github-actions/actions/tag/pr@v0.0.31
+    - uses: gustavogarayalde/github-actions/actions/tag/pr@v0.0.32
       name: Tag PR
       if: ${{ github.event_name == 'pull_request' }}
       with:
@@ -27,20 +27,13 @@ runs:
         build-tool: ${{ inputs.build-tool }}
         token: ${{ inputs.token }}
 
-    - uses: gustavogarayalde/github-actions/actions/release@v0.0.31
+    - uses: gustavogarayalde/github-actions/actions/release@v0.0.32
       name: Release
       if: ${{ github.event_name != 'pull_request' }}
       with:
         app-type: ${{ inputs.app-type }}
         build-tool: ${{ inputs.build-tool }}
         token: ${{ inputs.token }}
-
-    - uses: actions/checkout@v3
-      name: Checkout prepare push tag
-      if: ${{ github.event_name != 'pull_request' || inputs.app-type != 'npm-ui-lib' }}
-      with:
-        token: ${{ inputs.token }}
-        clean: "false"
 
     - name: Push tag
       shell: bash

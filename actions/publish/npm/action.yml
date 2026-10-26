@@ -6,6 +6,14 @@ inputs:
 runs:
   using: "composite"
   steps:
+    # Publish can be invoked independently; prepublishOnly needs the build tools.
+    # include=dev overrides an inherited production/omit=dev environment.
+    - name: Install build dependencies for publishing
+      shell: bash
+      run: npm ci --include=dev
+      env:
+        NODE_AUTH_TOKEN: ${{ inputs.token }}
+
     - name: Publish to GitHub Packages
       shell: bash
       run: npm publish

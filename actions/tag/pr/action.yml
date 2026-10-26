@@ -20,11 +20,6 @@ runs:
         git config user.name "GitHub Action"
         echo "PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')" >> $GITHUB_ENV
 
-    - uses: actions/checkout@v3
-      if: ${{ inputs.app-type == 'npm-ui-lib' }}
-      with:
-        ref: ${{ github.event.pull_request.head.ref }}
-
     - name: Tag Version
       if: ${{ inputs.build-tool == 'maven' || inputs.app-type == 'next-js' || inputs.app-type == 'vite' || inputs.build-tool == 'gradle' }}
       shell: bash
