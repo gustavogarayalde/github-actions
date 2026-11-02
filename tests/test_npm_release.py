@@ -16,6 +16,78 @@ def steps(action):
 
 
 class NpmReleaseTests(unittest.TestCase):
+    def test_push_only_the_new_tag_despite_conflicting_old_local_tags(self):
+        tagging = steps("actions/tag")
+        snapshot = next(s["run"] for s in tagging if s.get("name") == "Record existing tags")
+        push = next(s["run"] for s in tagging if s.get("name") == "Push tag")
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            remote = root / "remote.git"
+            checkout = root / "checkout"
+            checkout.mkdir()
+            def git(*args):
+                return subprocess.run(["git", *args], cwd=checkout, check=True, capture_output=True, text=True)
+            git("init", "--bare", str(remote))
+            git("init")
+            git("config", "user.email", "test@example.com")
+            git("config", "user.name", "Test")
+            git("commit", "--allow-empty", "-m", "initial")
+            git("remote", "add", "origin", str(remote))
+            git("tag", "v0.8.590")
+            git("push", "origin", "refs/tags/v0.8.590")
+            git("commit", "--allow-empty", "-m", "next")
+            git("tag", "-f", "v0.8.590")
+            git("tag", "unrelated-local-tag")
+            env_file = root / "env"
+            env = {**os.environ, "GITHUB_ENV": str(env_file)}
+            subprocess.run(["bash", "-e", "-c", snapshot], cwd=checkout, env=env, check=True, capture_output=True)
+            snapshot_path = env_file.read_text().strip().split("=", 1)[1]
+            self.addCleanup(Path(snapshot_path).unlink, missing_ok=True)
+            env["TAGS_BEFORE_FILE"] = snapshot_path
+            # No new tag must fail instead of choosing an unrelated tag.
+            result = subprocess.run(["bash", "-e", "-c", push], cwd=checkout, env=env, capture_output=True, text=True)
+            self.assertNotEqual(result.returncode, 0)
+            git("tag", "v0.8.594")
+            subprocess.run(["bash", "-e", "-c", push], cwd=checkout, env=env, check=True, capture_output=True)
+            self.assertIn("LATEST_TAG=v0.8.594", env_file.read_text())
+            remote_tags = git("ls-remote", "--tags", "origin").stdout
+            self.assertIn("refs/tags/v0.8.594", remote_tags)
+            self.assertNotIn("unrelated-local-tag", remote_tags)
+            self.assertNotEqual(git("rev-parse", "v0.8.590").stdout.strip(), remote_tags.split("\trefs/tags/v0.8.590")[0])
+            # Multiple new tags are ambiguous and must not be published.
+            git("tag", "another-new-tag")
+            result = subprocess.run(["bash", "-e", "-c", push], cwd=checkout, env=env, capture_output=True, text=True)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertNotIn("another-new-tag", git("ls-remote", "--tags", "origin").stdout)
+
+    def test_release_versions_only_a_clean_checkout(self):
+        release = next(s["run"] for s in steps("actions/release/npm") if s.get("name") == "NPM Release")
+        for initial, expected, dirty in [
+            ("1.2.3", "1.2.4", False),
+            ("1.2.3-pr.42", "1.2.3", False),
+            ("1.2.3", "1.2.3", True),
+        ]:
+            with self.subTest(initial=initial, dirty=dirty), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                def run(*args):
+                    return subprocess.run(args, cwd=root, check=True, capture_output=True, text=True)
+                run("git", "init")
+                run("git", "config", "user.email", "test@example.com")
+                run("git", "config", "user.name", "Test")
+                manifest = root / "package.json"
+                manifest.write_text(json.dumps({"name": "release-fixture", "version": initial}))
+                run("git", "add", "package.json")
+                run("git", "commit", "-m", "fixture")
+                if dirty:
+                    manifest.write_text(json.dumps({"name": "changed-by-install", "version": initial}))
+                result = subprocess.run(["bash", "-e", "-c", release], cwd=root, capture_output=True, text=True)
+                self.assertEqual(result.returncode, 1 if dirty else 0, result.stderr)
+                self.assertEqual(json.loads(manifest.read_text())["version"], expected)
+                self.assertEqual(run("git", "tag").stdout.strip(), "" if dirty else f"v{expected}")
+                if dirty:
+                    self.assertIn("package.json", result.stdout)
+                    self.assertIn("::error::", result.stdout)
+
     def test_tagging_does_not_replace_the_validated_checkout(self):
         for action in ["actions/tag", "actions/tag/pr"]:
             with self.subTest(action=action):

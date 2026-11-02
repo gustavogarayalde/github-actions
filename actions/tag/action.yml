@@ -19,6 +19,13 @@ runs:
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
 
+    - name: Record existing tags
+      shell: bash
+      run: |
+        TAGS_BEFORE_FILE=$(mktemp)
+        git tag --list | LC_ALL=C sort > "$TAGS_BEFORE_FILE"
+        echo "TAGS_BEFORE_FILE=$TAGS_BEFORE_FILE" >> "$GITHUB_ENV"
+
     - uses: gustavogarayalde/github-actions/actions/tag/pr@v0.0.32
       name: Tag PR
       if: ${{ github.event_name == 'pull_request' }}
@@ -37,8 +44,12 @@ runs:
 
     - name: Push tag
       shell: bash
-      run: git push --tags
-
-    - name: Get latest tag
-      shell: bash
-      run: echo "LATEST_TAG=$(git tag --sort=-creatordate | head -n 1)" >> $GITHUB_ENV
+      run: |
+        mapfile -t NEW_TAGS < <(LC_ALL=C comm -13 "$TAGS_BEFORE_FILE" <(git tag --list | LC_ALL=C sort))
+        if [[ ${#NEW_TAGS[@]} -ne 1 ]]; then
+          echo "::error::Expected exactly one new release tag, found ${#NEW_TAGS[@]}."
+          exit 1
+        fi
+        RELEASE_TAG=${NEW_TAGS[0]}
+        git push origin "refs/tags/$RELEASE_TAG:refs/tags/$RELEASE_TAG"
+        echo "LATEST_TAG=$RELEASE_TAG" >> "$GITHUB_ENV"
