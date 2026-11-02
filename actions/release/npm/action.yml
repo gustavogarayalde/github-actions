@@ -16,8 +16,19 @@ runs:
         fi
         CURRENT_VERSION=$(node -p "require('./package.json').version")
         BASE_VERSION=${CURRENT_VERSION%%-*}
+        # Read the remote before changing files; a shallow checkout may not
+        # contain tags left by an earlier partial release.
+        REMOTE_TAGS=$(git ls-remote --tags --refs origin)
+        REMOTE_TAG_REFS=$(printf '%s\n' "$REMOTE_TAGS" | cut -f2)
+        TAG_PREFIX=$(npm config get tag-version-prefix)
         if [[ "$CURRENT_VERSION" == *-* ]]; then
-          npm version "$BASE_VERSION"
+          NEXT_VERSION=$BASE_VERSION
         else
-          npm version patch
+          NEXT_VERSION=$(node -p "const v = '$BASE_VERSION'.split('.').map(Number); v[2]++; v.join('.')")
         fi
+        while git show-ref --verify --quiet "refs/tags/$TAG_PREFIX$NEXT_VERSION" ||
+          grep -Fqx "refs/tags/$TAG_PREFIX$NEXT_VERSION" <<< "$REMOTE_TAG_REFS"; do
+          echo "Version $NEXT_VERSION already has a tag; trying the next patch."
+          NEXT_VERSION=$(node -p "const v = '$NEXT_VERSION'.split('.').map(Number); v[2]++; v.join('.')")
+        done
+        npm version "$NEXT_VERSION"

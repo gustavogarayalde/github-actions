@@ -25,7 +25,3 @@ runs:
       if: ${{ inputs.build-tool == 'gradle'}}
       with:
         token: ${{ inputs.token }}
-
-    - name: Push version bump to repo
-      shell: bash
-      run: git push

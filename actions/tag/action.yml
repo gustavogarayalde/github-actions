@@ -26,7 +26,7 @@ runs:
         git tag --list | LC_ALL=C sort > "$TAGS_BEFORE_FILE"
         echo "TAGS_BEFORE_FILE=$TAGS_BEFORE_FILE" >> "$GITHUB_ENV"
 
-    - uses: gustavogarayalde/github-actions/actions/tag/pr@v0.0.32
+    - uses: gustavogarayalde/github-actions/actions/tag/pr@v0.0.33
       name: Tag PR
       if: ${{ github.event_name == 'pull_request' }}
       with:
@@ -34,7 +34,7 @@ runs:
         build-tool: ${{ inputs.build-tool }}
         token: ${{ inputs.token }}
 
-    - uses: gustavogarayalde/github-actions/actions/release@v0.0.32
+    - uses: gustavogarayalde/github-actions/actions/release@v0.0.33
       name: Release
       if: ${{ github.event_name != 'pull_request' }}
       with:
@@ -51,5 +51,10 @@ runs:
           exit 1
         fi
         RELEASE_TAG=${NEW_TAGS[0]}
-        git push origin "refs/tags/$RELEASE_TAG:refs/tags/$RELEASE_TAG"
+        if [[ "$GITHUB_EVENT_NAME" == 'pull_request' ]]; then
+          git push origin "refs/tags/$RELEASE_TAG:refs/tags/$RELEASE_TAG"
+        else
+          # A concurrent branch/tag update rejects the entire transaction.
+          git push --atomic origin "HEAD:refs/heads/$GITHUB_REF_NAME" "refs/tags/$RELEASE_TAG:refs/tags/$RELEASE_TAG"
+        fi
         echo "LATEST_TAG=$RELEASE_TAG" >> "$GITHUB_ENV"
