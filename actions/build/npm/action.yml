@@ -92,15 +92,36 @@ runs:
           git push
         fi
 
-    - name: Comment on PR with coverage percentages
-      if: ${{ github.event_name == 'pull_request' && inputs.skip-tests != 'true' }}
-      uses: ArtiomTr/jest-coverage-report-action@v2
+    - name: Report test coverage
+      if: ${{ inputs.skip-tests != 'true' }}
+      uses: actions/github-script@v7
       with:
         github-token: ${{ inputs.token }}
-        coverage-file: ./coverage/jest-report.json
-        base-coverage-file: ./coverage/jest-report.json
-        skip-step: all
-        annotations: none
+        script: |
+          const fs = require('node:fs');
+          const summary = JSON.parse(fs.readFileSync('coverage/coverage-summary.json', 'utf8'));
+          const metrics = ['statements', 'branches', 'functions', 'lines'];
+          const rows = metrics.map(metric => {
+            const result = summary.total?.[metric];
+            if (!result || !Number.isFinite(result.pct) || result.pct < 0 || result.pct > 100 ||
+                !Number.isFinite(result.covered) || !Number.isFinite(result.total)) {
+              throw new Error(`Invalid coverage summary metric: ${metric}`);
+            }
+            return `| ${metric} | ${result.pct}% | ${result.covered}/${result.total} |`;
+          });
+          const marker = '<!-- npm-test-coverage -->';
+          const report = [marker, '## Test coverage', '',
+            '| Metric | Coverage | Covered / Total |', '| --- | ---: | ---: |', ...rows].join('\n');
+          await core.summary.addRaw(report).write();
+          if (context.eventName !== 'pull_request') return;
+          const params = { ...context.repo, issue_number: context.issue.number };
+          const comments = await github.paginate(github.rest.issues.listComments, params);
+          const previous = comments.find(comment => comment.body?.startsWith(marker));
+          if (previous) {
+            await github.rest.issues.updateComment({ ...context.repo, comment_id: previous.id, body: report });
+          } else {
+            await github.rest.issues.createComment({ ...params, body: report });
+          }
 
     - name: Create Sentry release
       uses: getsentry/action-release@v1
@@ -111,6 +132,6 @@ runs:
         SENTRY_PROJECT: ${{ inputs.sentry-project }}
       with:
         version: ${{ env.LATEST_TAG }}
-        sourcemaps: ${{ inputs.app-type == 'vite' && 'dist' || '.next' }}
+        sourcemaps: ${{ inputs.app-type == 'next-js' && '.next' || 'dist' }}
         ignore_missing: "true"
         ignore_empty: "true"

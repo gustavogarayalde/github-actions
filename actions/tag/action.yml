@@ -26,7 +26,7 @@ runs:
         git tag --list | LC_ALL=C sort > "$TAGS_BEFORE_FILE"
         echo "TAGS_BEFORE_FILE=$TAGS_BEFORE_FILE" >> "$GITHUB_ENV"
 
-    - uses: gustavogarayalde/github-actions/actions/tag/pr@v0.0.34
+    - uses: gustavogarayalde/github-actions/actions/tag/pr@v0.0.35
       name: Tag PR
       if: ${{ github.event_name == 'pull_request' }}
       with:
@@ -34,7 +34,7 @@ runs:
         build-tool: ${{ inputs.build-tool }}
         token: ${{ inputs.token }}
 
-    - uses: gustavogarayalde/github-actions/actions/release@v0.0.34
+    - uses: gustavogarayalde/github-actions/actions/release@v0.0.35
       name: Release
       if: ${{ github.event_name != 'pull_request' }}
       with:
