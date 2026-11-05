@@ -19,19 +19,33 @@ runs:
         username: ${{ github.actor }}
         password: ${{ inputs.token }}
 
-    - name: Download start script
-      if: ${{ inputs.app-type == 'next-js' }}
+    - name: Prepare Docker runtime files
       shell: bash
+      env:
+        ACTION_DIRECTORY: ${{ github.action_path }}
+        APP_TYPE: ${{ inputs.app-type }}
       run: |
-        curl -o start.sh https://raw.githubusercontent.com/gustavogarayalde/github-actions/v0.0.30/dockerfiles/${{ inputs.app-type }}/start.sh
-        chmod +x start.sh
+        case "$APP_TYPE" in
+          spring-boot|next-js|vite|npm-ui-lib) ;;
+          *) echo "::error::Unsupported app-type: $APP_TYPE"; exit 1 ;;
+        esac
+        # Use assets from this action's release, not an independently pinned URL.
+        ASSETS_DIRECTORY="$ACTION_DIRECTORY/../../../dockerfiles/$APP_TYPE"
+        mkdir -p .github-actions-docker
+        cp "$ASSETS_DIRECTORY/Dockerfile" .github-actions-docker/Dockerfile
+        case "$APP_TYPE" in
+          next-js|vite)
+            cp "$ASSETS_DIRECTORY/start.sh" start.sh
+            chmod +x start.sh
+            ;;
+        esac
 
     - name: Build and push
       uses: docker/build-push-action@v3
       with:
         context: .
         push: true
-        file: https://raw.githubusercontent.com/gustavogarayalde/github-actions/v0.0.30/dockerfiles/${{ inputs.app-type }}/Dockerfile
+        file: .github-actions-docker/Dockerfile
         tags: ghcr.io/${{ github.repository }}/${{ github.event.repository.name }}:${{ env.LATEST_TAG }}
         github-token: ${{ inputs.token }}
 
