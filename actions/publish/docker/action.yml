@@ -45,6 +45,7 @@ runs:
       with:
         context: .
         push: true
+        pull: true
         file: .github-actions-docker/Dockerfile
         tags: ghcr.io/${{ github.repository }}/${{ github.event.repository.name }}:${{ env.LATEST_TAG }}
         github-token: ${{ inputs.token }}

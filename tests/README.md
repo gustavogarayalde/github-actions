@@ -4,7 +4,7 @@ Install `python3 -m pip install -r tests/requirements.txt`, then run `python3 -m
 
 The tests run local lifecycle hooks with a local devDependency, under NODE_ENV=production and npm_config_omit=dev, verify the prerelease version and packaged build output, check that npm ci preserves the lockfile, and validate shell syntax and nested action references. They do not publish, push, or use production services.
 
-The source and all nested action references are prepared for v0.0.36. Publish that actions release before enabling its consumer references. Release v0.0.33 mixed v0.0.33 orchestration with v0.0.32 release implementations, so its NPM release did not check occupied remote versions. Normal release preparation must keep all nested references on the same tag. Run the full suite before publishing the tag; `test_nested_action_references_use_the_prepared_release` rejects mixed versions and already runs in Action checks CI. Rerunning an older workflow keeps its pinned action version.
+The source and all nested action references are prepared for v0.0.37. Publish that actions release before enabling its consumer references. Release v0.0.33 mixed v0.0.33 orchestration with v0.0.32 release implementations, so its NPM release did not check occupied remote versions. Normal release preparation must keep all nested references on the same tag. Run the full suite before publishing the tag; `test_nested_action_references_use_the_prepared_release` rejects mixed versions and already runs in Action checks CI. Rerunning an older workflow keeps its pinned action version.
 
 Build and npm publication use npm ci --include=dev. Consumers must commit an up-to-date package-lock.json; peer policy is taken from their npm configuration. The action no longer forces legacy-peer-deps or rewrites their lockfile during CI. Tagging reuses the checked-out validated commit and its artifacts instead of running a second checkout.
 
@@ -21,8 +21,8 @@ the same summary file. `skip-tests` skips all coverage steps.
 Node 22.x resolves to the latest Node 22 release, meeting Vite 8 and Vitest 5's
 22.12 minimum. Sentry uses `.next` for Next.js and `dist` for Vite and UI libraries.
 Build, package publishing and Storybook still use the consumer's npm scripts.
-These changes are included in the prepared v0.0.36 release. Publish that release
-before updating po-ui-lib's `tag-release@v0.0.32` reference to `v0.0.36`.
+These changes are included in the prepared v0.0.37 release. Publish that release
+before updating po-ui-lib's `tag-release@v0.0.32` reference to `v0.0.37`.
 
 
 ## Vite runtime environment
@@ -46,3 +46,21 @@ regeneration, and Docker asset selection for all supported app types without
 publishing an image or calling external services. Changes must be included in
 a new published action release before consumers can use them; existing tags
 continue to resolve to their original assets.
+
+
+## Java security baseline (v0.0.37)
+
+CVE-2026-114938 requires Corretto 25.0.5.1.2 for Maven and Spring Boot,
+and Corretto 17.0.21.1.2 for Gradle. CI uses Corretto with `check-latest: true`
+to resolve the latest available release for Java 25 (Maven) and Java 17 (Gradle).
+
+Docker publishing uses `pull: true` to fetch the latest available
+`amazoncorretto:25-alpine` base image. Builds do not enforce a minimum
+Corretto patch version.
+Rebuild and redeploy existing application images after updating consumer action
+references to v0.0.37; existing containers do not receive the fix automatically.
+Verify `java -version` and the JDK release file inside the deployed image.
+
+Vendor releases:
+- https://github.com/corretto/corretto-25/releases/tag/25.0.5.1.2
+- https://github.com/corretto/corretto-17/releases/tag/17.0.21.1.2
